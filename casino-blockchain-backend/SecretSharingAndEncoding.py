@@ -6,6 +6,7 @@ import hashlib
 import os
 import pandas as pd
 import logging
+import random
 
 app = Flask(__name__)
 
@@ -14,12 +15,35 @@ CORS(app, resources={r"/api/*": {"origins": "http://localhost:3000"}})
 
 logging.basicConfig(level=logging.DEBUG)
 
+def shamir_split(secret, parts, threshold):
+    # Generate random coefficients for the polynomial
+    coeffs = [random.randint(0, 256) for _ in range(threshold - 1)]
+    coeffs.append(secret)
+
+    # Generate shares
+    shares = []
+    for i in range(1, parts + 1):
+        share = sum([coeff * (i ** exp) for exp, coeff in enumerate(coeffs)]) % 257
+        shares.append((i, share))
+    return shares
+
+def vss_split(secret, parts, threshold):
+    shares = shamir_split(secret, parts, threshold)
+    commitments = [hashlib.sha256(str(share).encode()).hexdigest() for share in shares]
+    return shares, commitments
+
+def vss_verify(shares, commitments):
+    for share, commitment in zip(shares, commitments):
+        if hashlib.sha256(str(share).encode()).hexdigest() != commitment:
+            return False
+    return True
+
 @app.route('/api/process-transaction', methods=['POST'])
 def process_transaction():
     print("Received a request to /api/process-transaction")
 
     # Define the output directory at the start of the function
-    output_dir = '/Users/lanxiangzhang/Desktop/Projects/Casino demo/casino-blockchain-backend/out'
+    output_dir = '/Users/lanxiangzhang/Desktop/Projects/Casino-demo/casino-blockchain-backend/out'
 
     if 'file' not in request.files:
         print("No file part in the request")
@@ -56,9 +80,6 @@ def process_transaction():
             print("CSV file is missing required columns")
             return jsonify({'error': 'CSV file is missing required columns'}), 400
 
-        # Process the CSV data as needed
-        # For example, you might want to log the transactions or perform additional processing
-
         # Use StegoSecrets CLI to encrypt and split the secret
         start_time = time.time()
         try:
@@ -67,6 +88,9 @@ def process_transaction():
         except subprocess.CalledProcessError as e:
             print(f"Error during stego command execution: {e.stderr}")
             return jsonify({'error': 'Failed to process transaction with StegoSecrets'}), 500
+
+        # Wait for files to be created
+        time.sleep(1)  # Adjust the sleep time as necessary
 
         # Create a new CSV file with share hashes
         share_hashes = []
@@ -197,6 +221,28 @@ def recover_transaction():
     except Exception as e:
         print(f"Error during recovery: {e}")
         return jsonify({'error': 'Failed to recover file'}), 500
+
+@app.route('/api/process-transaction-vss', methods=['POST'])
+def process_transaction_vss():
+    print("Received a request to /api/process-transaction-vss")
+    # ... common file handling and validation code ...
+
+    try:
+        # Example secret for demonstration purposes
+        secret = int.from_bytes(os.urandom(32), byteorder='big')
+        shares, commitments = vss_split(secret, parts=5, threshold=3)
+
+        # Verify shares
+        if not vss_verify(shares[:3], commitments[:3]):
+            return jsonify({'error': 'Share verification failed'}), 400
+
+        # Process shares and create response
+        share_hashes = [hashlib.sha256(str(share).encode()).hexdigest() for share in shares]
+        return jsonify({'shares': share_hashes, 'commitments': commitments})
+
+    except Exception as e:
+        print(f"Unexpected error: {e}")
+        return jsonify({'error': 'An unexpected error occurred'}), 500
 
 if __name__ == '__main__':
     app.run(host='0.0.0.0', port=5001, debug=True)
