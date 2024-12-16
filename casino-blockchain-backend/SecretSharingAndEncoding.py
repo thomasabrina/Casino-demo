@@ -372,10 +372,12 @@ def recover_transaction_rs():
         # Assume nsym is the number of symbols for error correction
         nsym = 10
         encoded_data = rs_encode(data, nsym)
-        decoded_data = rs_decode(encoded_data, nsym)
+        # Simulate data loss by removing some parts
+        corrupted_data = encoded_data[:-nsym]  # Remove nsym parts to simulate loss
+        decoded_data = rs_decode(corrupted_data, nsym)
 
         # Calculate metrics
-        shares_lost = max(0, len(keys) - nsym)
+        shares_lost = nsym
         processing_time = time.time() - start_time
         accuracy = 100.0  # Assuming perfect recovery
 
@@ -429,10 +431,12 @@ def recover_transaction_fountain():
 
         # Simulate Fountain Code recovery
         shares = fountain_encode(data, len(keys))
-        decoded_data = fountain_decode(shares, len(data))
+        # Simulate data loss by removing some shares
+        corrupted_shares = shares[:len(data)]  # Use only enough shares to recover
+        decoded_data = fountain_decode(corrupted_shares, len(data))
 
         # Calculate metrics
-        shares_lost = max(0, len(keys) - len(data))
+        shares_lost = len(keys) - len(corrupted_shares)
         processing_time = time.time() - start_time
         accuracy = 100.0  # Assuming perfect recovery
 
