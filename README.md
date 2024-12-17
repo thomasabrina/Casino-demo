@@ -1,17 +1,17 @@
 # Casino Blockchain Project
 
-This project is an online casino transaction processing system that utilizes secret sharing algorithms to enhance security. It consists of a frontend built with React and a backend powered by Flask.
+This project is an online casino transaction processing system that utilizes advanced security techniques, including Reed-Solomon encoding and Stego, to enhance data integrity and confidentiality. It consists of a frontend built with React and a backend powered by Flask.
 
 ## Project Structure
 
-- **casino-blockchain-frontend**: The frontend application built with React.
-- **casino-blockchain-backend**: The backend application built with Flask.
+- **casino-blockchain-frontend**: The frontend application built with React, providing an intuitive interface for users to upload and recover transaction files.
+- **casino-blockchain-backend**: The backend application built with Flask, handling secure transaction processing and recovery.
 
 ## Features
 
-- **Transaction Processing**: Upload and process transaction CSV files.
-- **Secret Sharing**: Use Shamir's Secret Sharing and Verifiable Secret Sharing (VSS) to securely distribute sensitive information.
-- **Download Results**: Download the processed results as CSV files for each algorithm.
+- **Transaction Processing**: Upload and process transaction CSV files with enhanced security.
+- **Data Encoding and Concealment**: Use Reed-Solomon encoding and Stego for robust data handling and concealment.
+- **Download Results**: Download processed and recovered transaction files.
 
 ## Prerequisites
 
@@ -20,6 +20,7 @@ This project is an online casino transaction processing system that utilizes sec
 - Flask and Flask-CORS
 - Pandas
 - Axios (for making HTTP requests in the frontend)
+- Reed-Solomon and Stego libraries
 
 ## Setup Instructions
 
@@ -78,14 +79,15 @@ This project is an online casino transaction processing system that utilizes sec
 
 2. **Upload a CSV file**: Use the file input to upload a transaction CSV file.
 
-3. **Process the file**: Click the appropriate button to process the file using either Shamir's Secret Sharing or VSS.
+3. **Process the file**: Click the appropriate button to process the file using Reed-Solomon encoding and Stego.
 
-4. **Download the results**: After processing, use the download buttons to retrieve the result CSV files for each algorithm.
+4. **Download the results**: After processing, use the download buttons to retrieve the result CSV files.
 
 ## File Structure
 
 - **casino-blockchain-frontend/src/components/FileUpload.js**: Handles file uploads and interactions with the backend.
-- **casino-blockchain-backend/SecretSharingAndEncoding.py**: Contains the Flask routes and logic for processing transactions and secret sharing.
+- **casino-blockchain-frontend/src/components/RecoveryUpload.js**: Manages the recovery of transaction files.
+- **casino-blockchain-backend/SecretSharingAndEncoding.py**: Contains the Flask routes and logic for processing and recovering transactions.
 
 ## Contributing
 
