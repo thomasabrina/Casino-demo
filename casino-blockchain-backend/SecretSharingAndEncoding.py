@@ -157,6 +157,7 @@ def process_transaction():
 
 @app.route('/api/recover-transaction', methods=['POST'])
 def recover_transaction():
+    start_time = time.time()
     try:
         # Get the uploaded files
         encoded_file = request.files.get('file')
@@ -172,12 +173,32 @@ def recover_transaction():
 
         # If rs.decode() returns more than one value, adjust accordingly
         if isinstance(decoded_data, tuple):
-            decoded_data = decoded_data[0]  # Extract the first element if it's a tuple
+            decoded_data = decoded_data[0]
 
         # Save the decoded data to a file
         recovered_file_path = 'recovered_transaction.csv'
         with open(recovered_file_path, 'wb') as f:
             f.write(decoded_data)
+
+        # Calculate processing time
+        processing_time = time.time() - start_time
+
+        # Count transactions
+        df = pd.read_csv(recovered_file_path)
+        transaction_count = len(df)
+
+        # Add summary information to the DataFrame
+        summary_data = {
+            'Summary': ['Transactions Recovered', 'Processing Time (seconds)'],
+            'Value': [transaction_count, f"{processing_time:.2f}"]
+        }
+        summary_df = pd.DataFrame(summary_data)
+
+        # Append summary to the original data
+        result_df = pd.concat([df, summary_df], ignore_index=True)
+
+        # Save the updated DataFrame to the CSV
+        result_df.to_csv(recovered_file_path, index=False)
 
         # Return the recovered file
         return send_file(recovered_file_path, as_attachment=True, download_name='recovered_transaction.csv')
