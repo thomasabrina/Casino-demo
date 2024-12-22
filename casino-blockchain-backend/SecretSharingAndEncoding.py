@@ -13,7 +13,7 @@ CORS(app, resources={r"/api/*": {"origins": "http://localhost:3000"}})
 logging.basicConfig(level=logging.DEBUG)
 
 # Initialize Reed-Solomon codec
-rs = reedsolo.RSCodec(10)  # 10 is the number of error correction symbols
+rs = reedsolo.RSCodec(20)  # 10 is the number of error correction symbols
 
 @app.route('/api/process-transaction', methods=['POST'])
 def process_transaction():
